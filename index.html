@@ -4,132 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>富貴包專屬點餐系統</title>
-    <!-- 引入穩定的 Tailwind CSS 庫 -->
-    <script src="https://jsdelivr.net"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; }
+        .btn-container { max-width: 448px; margin: 0 auto 16px auto; display: flex; gap: 8px; background: white; padding: 8px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn-tab { flex: 1; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; font-size: 16px; }
+        #btn-cust { background-color: #d97706; color: white; }
+        #btn-admin { background-color: #e5e7eb; color: #374151; }
+        .view-box { max-width: 448px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background-color: #d97706; padding: 20px; color: white; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 4px 0 0 0; font-size: 12px; opacity: 0.9; }
+        .menu-list { padding: 16px; max-height: 50vh; overflow-y: auto; }
+        .category-title { font-weight: bold; color: #1f2937; border-left: 4px solid #d97706; padding-left: 8px; margin: 16px 0 8px 0; }
+        .item-card { display: flex; justify-content: space-between; align-items: center; background: #f9fafb; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f3f4f6; }
+        .item-info h4 { margin: 0; color: #1f2937; font-size: 16px; }
+        .item-info p { margin: 2px 0 0 0; color: #d97706; font-weight: 500; font-size: 14px; }
+        .qty-btn-box { display: flex; align-items: center; gap: 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px 8px; }
+        .qty-btn { border: none; background: none; font-size: 18px; font-weight: bold; cursor: pointer; width: 24px; }
+        .qty-btn.plus { color: #d97706; }
+        .qty-btn.minus { color: #6b7280; }
+        .qty-num { font-weight: 600; width: 16px; text-align: center; }
+        .cart-box { padding: 16px; border-top: 1px solid #f3f4f6; background: #f9fafb; }
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 16px; }
+        .total-price { font-size: 24px; font-weight: 900; color: #d97706; }
+        .submit-btn { width: 100%; background: #d97706; color: white; border: none; font-weight: bold; padding: 14px; border-radius: 12px; font-size: 16px; cursor: pointer; }
+        .admin-box { max-width: 448px; margin: 0 auto; background: white; border-radius: 16px; padding: 16px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 16px; }
+        .admin-title h2 { margin: 0; font-size: 20px; color: #1f2937; }
+        .admin-title p { margin: 4px 0 0 0; font-size: 12px; color: #6b7280; }
+        .badge { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; }
+        .order-card { background: #f9fafb; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 12px; }
+        .order-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .order-id { font-family: monospace; color: #6b7280; }
+        .order-num { font-weight: 900; color: #d97706; font-size: 18px; }
+        .order-items { font-size: 14px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
+        .status-badge { background: #ffedd5; color: #c2410c; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+        .done-btn { background: #111827; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
+<body>
 
-    <!-- 頂部切換按鈕 -->
-    <div class="max-w-md mx-auto mb-4 flex justify-center gap-2 bg-white p-2 rounded-xl shadow-sm">
-        <button onclick="switchView('customer')" id="btn-cust" class="flex-1 py-2 rounded-lg font-bold bg-amber-500 text-white shadow-md transition">📱 顧客點餐</button>
-        <button onclick="switchView('admin')" id="btn-admin" class="flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 transition">🏪 老闆後台</button>
+    <div class="btn-container">
+        <button onclick="switchView('customer')" id="btn-cust" class="btn-tab">📱 顧客點餐</button>
+        <button onclick="switchView('admin')" id="btn-admin" class="btn-tab">🏪 老闆後台</button>
     </div>
 
-    <!-- ==================== 1. 顧客手機點餐端 ==================== -->
-    <div id="customer-view" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden block">
-        <div class="bg-amber-600 p-5 text-white text-center">
-            <h1 class="text-2xl font-extrabold tracking-wider">富貴包 點餐系統</h1>
-            <p class="text-xs mt-1 opacity-90">手工現做・皮薄餡多・好喫又富貴</p>
+    <div id="customer-view" class="view-box">
+        <div class="header">
+            <h1>富貴包 點餐系統</h1>
+            <p>手工現做・皮薄餡多・好喫又富貴</p>
         </div>
-
-        <!-- 菜單列表 -->
-        <div class="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
-            
-            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2">包子類</h3>
-            <!-- 豆沙包 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">豆沙包</h4><p class="text-amber-600 font-medium text-sm">$18</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('豆沙包', 18, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-豆沙包" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('豆沙包', 18, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+        <div class="menu-list">
+            <div class="category-title">包子類</div>
+            <div class="item-card">
+                <div class="item-info"><h4>豆沙包</h4><p>$18</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('豆沙包', 18, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-豆沙包" class="qty-num">0</span>
+                    <button onclick="updateQty('豆沙包', 18, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-            <!-- 肉包 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">肉包</h4><p class="text-amber-600 font-medium text-sm">$20</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('肉包', 20, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-肉包" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('肉包', 20, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+            <div class="item-card">
+                <div class="item-info"><h4>肉包</h4><p>$20</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('肉包', 20, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-肉包" class="qty-num">0</span>
+                    <button onclick="updateQty('肉包', 20, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-            <!-- 竹筍包 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">竹筍包</h4><p class="text-amber-600 font-medium text-sm">$20</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('竹筍包', 20, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-竹筍包" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('竹筍包', 20, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+            <div class="item-card">
+                <div class="item-info"><h4>竹筍包</h4><p>$20</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('竹筍包', 20, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-竹筍包" class="qty-num">0</span>
+                    <button onclick="updateQty('竹筍包', 20, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-
-            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2 mt-4">饅頭類</h3>
-            <!-- 黑糖饅頭 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">黑糖饅頭</h4><p class="text-amber-600 font-medium text-sm">$15</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('黑糖饅頭', 15, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-黑糖饅頭" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('黑糖饅頭', 15, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+            <div class="category-title">饅頭類</div>
+            <div class="item-card">
+                <div class="item-info"><h4>黑糖饅頭</h4><p>$15</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('黑糖饅頭', 15, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-黑糖饅頭" class="qty-num">0</span>
+                    <button onclick="updateQty('黑糖饅頭', 15, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-            <!-- 饅頭夾蛋 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">饅頭夾蛋</h4><p class="text-amber-600 font-medium text-sm">$25</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('饅頭夾蛋', 25, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-饅頭夾蛋" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('饅頭夾蛋', 25, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+            <div class="item-card">
+                <div class="item-info"><h4>饅頭夾蛋</h4><p>$25</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('饅頭夾蛋', 25, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-饅頭夾蛋" class="qty-num">0</span>
+                    <button onclick="updateQty('饅頭夾蛋', 25, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-
-            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2 mt-4">飲料類</h3>
-            <!-- 豆漿 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">豆漿</h4><p class="text-amber-600 font-medium text-sm">$15</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('豆漿', 15, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-豆漿" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('豆漿', 15, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+            <div class="category-title">飲料類</div>
+            <div class="item-card">
+                <div class="item-info"><h4>豆漿</h4><p>$15</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('豆漿', 15, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-豆漿" class="qty-num">0</span>
+                    <button onclick="updateQty('豆漿', 15, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-            <!-- 奶茶 -->
-            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
-                <div><h4 class="font-bold text-gray-800">奶茶</h4><p class="text-amber-600 font-medium text-sm">$20</p></div>
-                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
-                    <button onclick="updateQty('奶茶', 20, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
-                    <span id="qty-奶茶" class="w-4 text-center font-semibold text-gray-800">0</span>
-                    <button onclick="updateQty('奶茶', 20, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+            <div class="item-card">
+                <div class="item-info"><h4>奶茶</h4><p>$20</p></div>
+                <div class="qty-btn-box">
+                    <button onclick="updateQty('奶茶', 20, -1)" class="qty-btn minus">-</button>
+                    <span id="qty-奶茶" class="qty-num">0</span>
+                    <button onclick="updateQty('奶茶', 20, 1)" class="qty-btn plus">+</button>
                 </div>
             </div>
-            
         </div>
-
-        <!-- 購物車送出區 -->
-        <div class="p-4 border-t border-gray-100 bg-gray-50">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-gray-600 font-medium">總計金額：</span>
-                <span class="text-2xl font-black text-amber-600">$<span id="total-amount">0</span></span>
-            </div>
-            <button onclick="submitOrder()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-98 transition">
-                🚀 送出訂單 / 呼叫後台
-            </button>
+        <div class="cart-box">
+            <div class="total-row"><span>總計金額：</span><span class="total-price">$<span id="total-amount">0</span></span></div>
+            <button onclick="submitOrder()" class="submit-btn">🚀 送出訂單 / 呼叫後台</button>
         </div>
     </div>
 
-    <!-- ==================== 2. 老闆管理後台 ==================== -->
-    <div id="admin-view" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-4 hidden">
-        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
-            <div>
-                <h2 class="text-xl font-black text-gray-800">雲端接單後台</h2>
-                <p class="text-xs text-gray-500">即時同步客人的測試訂單</p>
-            </div>
-            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">營業中</span>
+    <div id="admin-view" class="admin-box">
+        <div class="admin-header">
+            <div class="admin-title"><h2>雲端接單後台</h2><p>即時同步客人的測試訂單</p></div>
+            <span class="badge">營業中</span>
         </div>
-
-        <div id="order-list-container" class="space-y-3"></div>
+        <div id="order-list-container"></div>
     </div>
 
-    <!-- ==================== JavaScript 核心邏輯 ==================== -->
     <script>
         let cart = {};
-        let orders = [
-            { id: "0001", number: "A12", items: "肉包 x2, 豆漿 x1", total: 55, status: "已接單" }
-        ];
+        let orders = [{ id: "0001", number: "A12", items: "肉包 x2", total: 40, status: "已接單" }];
         let orderCounter = 2;
 
         function updateQty(name, price, change) {
@@ -155,22 +157,17 @@
                     total += cart[key].quantity * cart[key].price;
                 }
             }
-            if (itemStrings.length === 0) {
-                alert("購物車內沒有商品，請先點餐！");
-                return;
-            }
+            if (itemStrings.length === 0) { alert("購物車內沒有商品！"); return; }
 
-            let newOrder = {
-                id: `000${orderCounter}`,
-                number: `A${11 + orderCounter}`,
-                items: itemStrings.join(", "),
-                total: total,
-                status: "製作中"
-            };
-
+            let newOrder = { id: `000${orderCounter}`, number: `A${11 + orderCounter}`, items: itemStrings.join(", "), total: total, status: "製作中" };
             orders.unshift(newOrder);
             orderCounter++;
 
             for (let key in cart) {
                 cart[key].quantity = 0;
                 let el = document.getElementById(`qty-${key}`);
+                if(el) el.innerText = 0;
+            }
+            document.getElementById('total-amount').innerText = 0;
+            cart = {};
+            renderOrders();
