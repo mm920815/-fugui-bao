@@ -131,14 +131,14 @@
 
     <script>
         let cart = {};
-        let orders = [{ id: "0001", number: "A12", items: "肉包 x2", total: 40, status: "已接單" }];
+        let orders = [{ id: "0001", number: "A12", items: "肉包 x2, 豆漿 x1", total: 55, status: "已接單" }];
         let orderCounter = 2;
 
         function updateQty(name, price, change) {
             if (!cart[name]) cart[name] = { quantity: 0, price: price };
             cart[name].quantity += change;
             if (cart[name].quantity < 0) cart[name].quantity = 0;
-            document.getElementById(`qty-${name}`).innerText = cart[name].quantity;
+            document.getElementById('qty-' + name).innerText = cart[name].quantity;
             calculateTotal();
         }
 
@@ -153,19 +153,19 @@
             let total = 0;
             for (let key in cart) {
                 if (cart[key].quantity > 0) {
-                    itemStrings.push(`${key} x${cart[key].quantity}`);
+                    itemStrings.push(key + ' x' + cart[key].quantity);
                     total += cart[key].quantity * cart[key].price;
                 }
             }
             if (itemStrings.length === 0) { alert("購物車內沒有商品！"); return; }
 
-            let newOrder = { id: `000${orderCounter}`, number: `A${11 + orderCounter}`, items: itemStrings.join(", "), total: total, status: "製作中" };
+            let newOrder = { id: '000' + orderCounter, number: 'A' + (11 + orderCounter), items: itemStrings.join(", "), total: total, status: "製作中" };
             orders.unshift(newOrder);
             orderCounter++;
 
             for (let key in cart) {
                 cart[key].quantity = 0;
-                let el = document.getElementById(`qty-${key}`);
+                let el = document.getElementById('qty-' + key);
                 if(el) el.innerText = 0;
             }
             document.getElementById('total-amount').innerText = 0;
