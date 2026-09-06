@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>富貴包專屬點餐系統</title>
+    <!-- 引入穩定的 Tailwind CSS 庫 -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -12,51 +13,164 @@
 <body class="bg-gray-100 min-h-screen p-4">
 
     <!-- 頂部切換按鈕 -->
-    <div class="max-w-4xl mx-auto mb-6 flex justify-center gap-4 bg-white p-2 rounded-xl shadow-xs">
-        <button onclick="switchView('customer')" id="btn-cust" class="px-6 py-2 rounded-lg font-bold bg-amber-500 text-white shadow-md transition">📱 顧客手機點餐端</button>
-        <button onclick="switchView('admin')" id="btn-admin" class="px-6 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 transition">🏪 老闆管理後台</button>
+    <div class="max-w-md mx-auto mb-4 flex justify-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+        <button onclick="switchView('customer')" id="btn-cust" class="flex-1 py-2 rounded-lg font-bold bg-amber-500 text-white shadow-md transition">📱 顧客點餐</button>
+        <button onclick="switchView('admin')" id="btn-admin" class="flex-1 py-2 rounded-lg font-bold bg-gray-200 text-gray-700 transition">🏪 老闆後台</button>
     </div>
 
     <!-- ==================== 1. 顧客手機點餐端 ==================== -->
-    <div id="customer-view" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div class="bg-amber-600 p-6 text-white text-center">
-            <h1 class="text-3xl font-extrabold tracking-wider">富貴包</h1>
+    <div id="customer-view" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl overflow-hidden block">
+        <div class="bg-amber-600 p-5 text-white text-center">
+            <h1 class="text-2xl font-extrabold tracking-wider">富貴包 點餐系統</h1>
             <p class="text-xs mt-1 opacity-90">手工現做・皮薄餡多・好喫又富貴</p>
         </div>
 
         <!-- 菜單列表 -->
-        <div class="p-4 space-y-4 max-h-[55vh] overflow-y-auto" id="menu-container">
-            <!-- 區塊：包子 -->
+        <div class="p-4 space-y-4 max-h-[50vh] overflow-y-auto">
+            
             <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2">包子類</h3>
-            <div class="space-y-3" id="category-buns"></div>
+            <!-- 豆沙包 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">豆沙包</h4><p class="text-amber-600 font-medium text-sm">$18</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('豆沙包', 18, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-豆沙包" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('豆沙包', 18, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
+            <!-- 肉包 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">肉包</h4><p class="text-amber-600 font-medium text-sm">$20</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('肉包', 20, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-肉包" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('肉包', 20, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
+            <!-- 竹筍包 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">竹筍包</h4><p class="text-amber-600 font-medium text-sm">$20</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('竹筍包', 20, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-竹筍包" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('竹筍包', 20, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
 
-            <!-- 區塊：饅頭 -->
-            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2 mt-6">饅頭類</h3>
-            <div class="space-y-3" id="category-mantou"></div>
+            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2 mt-4">饅頭類</h3>
+            <!-- 黑糖饅頭 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">黑糖饅頭</h4><p class="text-amber-600 font-medium text-sm">$15</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('黑糖饅頭', 15, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-黑糖饅頭" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('黑糖饅頭', 15, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
+            <!-- 饅頭夾蛋 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">饅頭夾蛋</h4><p class="text-amber-600 font-medium text-sm">$25</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('饅頭夾蛋', 25, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-饅頭夾蛋" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('饅頭夾蛋', 25, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
 
-            <!-- 區塊：飲料 -->
-            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2 mt-6">飲料類</h3>
-            <div class="space-y-3" id="category-drinks"></div>
+            <h3 class="font-bold text-gray-800 border-l-4 border-amber-500 pl-2 mt-4">飲料類</h3>
+            <!-- 豆漿 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">豆漿</h4><p class="text-amber-600 font-medium text-sm">$15</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('豆漿', 15, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-豆漿" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('豆漿', 15, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
+            <!-- 奶茶 -->
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 shadow-sm">
+                <div><h4 class="font-bold text-gray-800">奶茶</h4><p class="text-amber-600 font-medium text-sm">$20</p></div>
+                <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-2 py-1">
+                    <button onclick="updateQty('奶茶', 20, -1)" class="w-6 h-6 text-gray-500 font-bold">-</button>
+                    <span id="qty-奶茶" class="w-4 text-center font-semibold text-gray-800">0</span>
+                    <button onclick="updateQty('奶茶', 20, 1)" class="w-6 h-6 text-amber-600 font-bold">+</button>
+                </div>
+            </div>
+            
         </div>
 
-        <!-- 購物車與送出區 -->
+        <!-- 購物車送出區 -->
         <div class="p-4 border-t border-gray-100 bg-gray-50">
             <div class="flex justify-between items-center mb-4">
                 <span class="text-gray-600 font-medium">總計金額：</span>
                 <span class="text-2xl font-black text-amber-600">$<span id="total-amount">0</span></span>
             </div>
-            <button onclick="submitOrder()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-amber-600/20 active:scale-98 transition">
+            <button onclick="submitOrder()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow-lg active:scale-98 transition">
                 🚀 送出訂單 / 呼叫後台
             </button>
         </div>
     </div>
 
     <!-- ==================== 2. 老闆管理後台 ==================== -->
-    <div id="admin-view" class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6 hidden">
-        <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-6">
+    <div id="admin-view" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-4 hidden">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
             <div>
-                <h2 class="text-2xl font-black text-gray-800">富貴包 雲端接單後台</h2>
-                <p class="text-xs text-gray-500 mt-1">即時同步客人的測試訂單</p>
+                <h2 class="text-xl font-black text-gray-800">雲端接單後台</h2>
+                <p class="text-xs text-gray-500">即時同步客人的測試訂單</p>
             </div>
-            <div class="bg-amber-50 text-amber-700 px-4 py-1.5 rounded-full text-sm font-bold border border-amber-200">營業中</div>
+            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">營業中</span>
         </div>
+
+        <div id="order-list-container" class="space-y-3"></div>
+    </div>
+
+    <!-- ==================== JavaScript 核心邏輯 ==================== -->
+    <script>
+        let cart = {};
+        let orders = [
+            { id: "0001", number: "A12", items: "肉包 x2, 豆漿 x1", total: 55, status: "已接單" }
+        ];
+        let orderCounter = 2;
+
+        function updateQty(name, price, change) {
+            if (!cart[name]) cart[name] = { quantity: 0, price: price };
+            cart[name].quantity += change;
+            if (cart[name].quantity < 0) cart[name].quantity = 0;
+            document.getElementById(`qty-${name}`).innerText = cart[name].quantity;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            for (let key in cart) total += cart[key].quantity * cart[key].price;
+            document.getElementById('total-amount').innerText = total;
+        }
+
+        function submitOrder() {
+            let itemStrings = [];
+            let total = 0;
+            for (let key in cart) {
+                if (cart[key].quantity > 0) {
+                    itemStrings.push(`${key} x${cart[key].quantity}`);
+                    total += cart[key].quantity * cart[key].price;
+                }
+            }
+            if (itemStrings.length === 0) {
+                alert("購物車內沒有商品，請先點餐！");
+                return;
+            }
+
+            let newOrder = {
+                id: `000${orderCounter}`,
+                number: `A${11 + orderCounter}`,
+                items: itemStrings.join(", "),
+                total: total,
+                status: "製作中"
+            };
+
+            orders.unshift(newOrder);
+            orderCounter++;
+
+            for (let key in cart) {
+                cart[key].quantity = 0;
+                let el = document.getElementById(`qty-${key}`);
