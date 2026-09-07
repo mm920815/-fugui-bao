@@ -1,8 +1,36 @@
 <script>
+// ✨ 偵錯監聽器與核心功能移至最頂端，徹底防止手機版底部截斷 Bug！ ✨
 window.onerror = function(message, source, lineno, colno, error) {
     alert("捕獲到手機端錯誤: " + message + "\n在 " + source + ":" + lineno);
     return true;
 };
+
+var products = {
+    bean: { name: '豆沙包', price: 18, count: 0 },
+    meat: { name: '肉包', price: 20, count: 0 },
+    bamboo: { name: '竹筍包', price: 20, count: 0 },
+    brown: { name: '黑糖饅頭', price: 15, count: 0 },
+    egg: { name: '饅頭夾蛋', price: 25, count: 0 },
+    soy: { name: '豆漿', price: 15, count: 0 },
+    milk: { name: '奶茶', price: 20, count: 0 }
+};
+
+function changeCount(key, val) {
+    if (!products[key]) return;
+    var newCount = products[key].count + val;
+    if (newCount < 0) newCount = 0;
+    products[key].count = newCount;
+    document.getElementById('count-' + key).innerText = newCount;
+    calculateTotal();
+}
+
+function calculateTotal() {
+    var total = 0;
+    for (var key in products) {
+        total += products[key].count * products[key].price;
+    }
+    document.getElementById('total-amount').innerText = '\$ ' + total;
+}
 </script>
 
 <!DOCTYPE html>
@@ -14,200 +42,54 @@ window.onerror = function(message, source, lineno, colno, error) {
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #fcf8f2;
+            margin: 0; padding: 0; background-color: #fcf8f2;
             background-image: 
                 radial-gradient(rgba(217, 119, 6, 0.03) 15%, transparent 16%),
                 radial-gradient(rgba(217, 119, 6, 0.04) 15%, transparent 16%),
                 linear-gradient(45deg, rgba(217, 119, 6, 0.02) 25%, transparent 25%, transparent 75%, rgba(217, 119, 6, 0.02) 75%, rgba(217, 119, 6, 0.02)),
                 linear-gradient(45deg, rgba(217, 119, 6, 0.02) 25%, transparent 25%, transparent 75%, rgba(217, 119, 6, 0.02) 75%, rgba(217, 119, 6, 0.02));
-            background-size: 60px 60px, 60px 60px, 60px 60px, 60px 60px;
-            background-position: 0 0, 30px 30px, 0 0, 30px 30px;
-            color: #333; 
-            display: flex; 
-            justify-content: center; 
+            background-size: 60px 60px; background-position: 0 0, 30px 30px, 0 0, 30px 30px;
+            color: #333; display: flex; justify-content: center; 
         }
-        .main-container { 
-            display: flex; 
-            flex-direction: row; 
-            width: 100%; 
-            max-width: 1200px; 
-            padding: 20px; 
-            gap: 20px; 
-            box-sizing: border-box; 
-        }
-        .view-box { 
-            flex: 1; 
-            background: rgba(255, 255, 255, 0.96); 
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(217,119,6,0.06); 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-            height: calc(100vh - 40px); 
-            backdrop-filter: blur(5px); 
-        }
-        .header { 
-            background: linear-gradient(135deg, #eab308, #d97706); 
-            color: white; 
-            padding: 24px 20px; 
-            text-align: center; 
-        }
+        .main-container { display: flex; flex-direction: row; width: 100%; max-width: 1200px; padding: 20px; gap: 20px; box-sizing: border-box; }
+        .view-box { flex: 1; background: rgba(255, 255, 255, 0.96); border-radius: 16px; box-shadow: 0 10px 30px rgba(217,119,6,0.06); overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 40px); backdrop-filter: blur(5px); }
+        .header { background: linear-gradient(135deg, #eab308, #d97706); color: white; padding: 24px 20px; text-align: center; }
         .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header p { margin: 6px 0 0; font-size: 14px; opacity: 0.95; font-weight: 300; }
-        .nav-tabs { 
-            display: flex; 
-            background: #fdfaf6; 
-            border-bottom: 1px solid #f1e4d3; 
-        }
-        .btn-tab { 
-            flex: 1; 
-            padding: 14px; 
-            text-align: center; 
-            background: none; 
-            border: none; 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #8c7e6c; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-        }
-        .btn-tab.active { 
-            color: #d97706; 
-            border-bottom: 3px solid #d97706; 
-            background: #ffffff; 
-        }
-        .menu-list { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 16px; 
-        }
-        .category-title { 
-            font-size: 18px; 
-            color: #78350f; 
-            border-left: 4px solid #d97706; 
-            padding-left: 8px; 
-            margin: 20px 0 12px; 
-            font-weight: bold;
-        }
-        .menu-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 16px 8px; 
-            border-bottom: 1px solid #fcf6ed; 
-        }
+        .nav-tabs { display: flex; background: #fdfaf6; border-bottom: 1px solid #f1e4d3; }
+        .btn-tab { flex: 1; padding: 14px; text-align: center; background: none; border: none; font-size: 16px; font-weight: bold; color: #8c7e6c; cursor: pointer; transition: all 0.2s; }
+        .btn-tab.active { color: #d97706; border-bottom: 3px solid #d97706; background: #ffffff; }
+        .menu-list { flex: 1; overflow-y: auto; padding: 16px; }
+        .category-title { font-size: 18px; color: #78350f; border-left: 4px solid #d97706; padding-left: 8px; margin: 20px 0 12px; font-weight: bold; }
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 8px; border-bottom: 1px solid #fcf6ed; }
         .item-info h4 { margin: 0; font-size: 16px; color: #1e293b; }
         .item-info p { margin: 4px 0 0; font-size: 14px; color: #dc2626; font-weight: bold; }
-        .counter { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            background: #fdf6ec; 
-            padding: 4px 8px; 
-            border-radius: 20px; 
-        }
-        .btn-calc { 
-            width: 28px; 
-            height: 28px; 
-            border-radius: 50%; 
-            border: none; 
-            background: #ffffff; 
-            color: #d97706; 
-            font-size: 16px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            box-shadow: 0 1px 4px rgba(217,119,6,0.15); 
-            -webkit-tap-highlight-color: transparent; 
-        }
-        .btn-calc:active { background: #e2e8f0; }
+        .counter { display: flex; align-items: center; gap: 12px; background: #fdf6ec; padding: 4px 8px; border-radius: 20px; }
+        .btn-calc { width: 28px; height: 28px; border-radius: 50%; border: none; background: #ffffff; color: #d97706; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(217,119,6,0.15); -webkit-tap-highlight-color: transparent; }
         .count-num { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; color: #451a03; }
-        .footer-bar { 
-            padding: 16px; 
-            background: #ffffff; 
-            border-top: 1px solid #f1e4d3; 
-        }
-        .total-price { 
-            font-size: 18px; 
-            font-weight: bold; 
-            margin-bottom: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            color: #451a03;
-        }
-        .btn-submit { 
-            width: 100%; 
-            padding: 14px; 
-            background: linear-gradient(135deg, #eab308, #d97706);
-            color: white; 
-            border: none; 
-            border-radius: 25px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); 
-            -webkit-tap-highlight-color: transparent; 
-            letter-spacing: 1px;
-        }
-        .btn-submit:active { transform: scale(0.99); }
-        .backend-box { 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-        }
-        .status-badge { 
-            align-self: center; 
-            background: #dcfce7; 
-            color: #15803d; 
-            padding: 6px 16px; 
-            border-radius: 20px; 
-            font-weight: bold; 
-            margin-top: 20px; 
-            font-size: 14px; 
-        }
-        .order-list { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-        }
-        .order-card { 
-            background: #fdfbf7; 
-            border: 1px solid #f1e4d3; 
-            border-radius: 12px; 
-            padding: 16px; 
-            margin-bottom: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        }
+        .footer-bar { padding: 16px; background: #ffffff; border-top: 1px solid #f1e4d3; }
+        .total-price { font-size: 18px; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; color: #451a03; }
+        .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #eab308, #d97706); color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); -webkit-tap-highlight-color: transparent; letter-spacing: 1px; }
+        .backend-box { display: flex; flex-direction: column; height: 100%; }
+        .status-badge { align-self: center; background: #dcfce7; color: #15803d; padding: 6px 16px; border-radius: 20px; font-weight: bold; margin-top: 20px; font-size: 14px; }
+        .order-list { flex: 1; overflow-y: auto; padding: 20px; }
+        .order-card { background: #fdfbf7; border: 1px solid #f1e4d3; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         .order-time { font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
         .order-item-detail { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
-        
-        @media (max-width: 768px) { 
-            .main-container { padding: 0; gap: 0; height: 100vh; }
-            .view-box { border-radius: 0; height: 100vh; }
-            .view-box.hidden { display: none !important; }
-        }
+        @media (max-width: 768px) { .main-container { padding: 0; gap: 0; height: 100vh; } .view-box { border-radius: 0; height: 100vh; } .view-box.hidden { display: none !important; } }
     </style>
 </head>
 <body>
-
 <div class="main-container">
-    <!-- 顧客點餐面板 -->
     <div id="customer-view" class="view-box">
         <div class="header">
             <h1>富貴包 點餐系統</h1>
             <p>手工現做・皮薄餡多・好喫又富貴</p>
         </div>
-        
-        <!-- 手機版切換頁籤 -->
         <div class="nav-tabs">
             <button class="btn-tab active" onclick="switchView('customer')">📱 顧客點餐</button>
             <button class="btn-tab" onclick="switchView('backend')">🏪 老闆後台</button>
         </div>
-
         <div class="menu-list">
             <div class="category-title">包子類</div>
             <div class="menu-item">
@@ -234,7 +116,6 @@ window.onerror = function(message, source, lineno, colno, error) {
                     <button class="btn-calc" onclick="changeCount('bamboo', 1)">+</button>
                 </div>
             </div>
-
             <div class="category-title">饅頭類</div>
             <div class="menu-item">
                 <div class="item-info"><h4>黑糖饅頭</h4><p>$15</p></div>
@@ -252,7 +133,6 @@ window.onerror = function(message, source, lineno, colno, error) {
                     <button class="btn-calc" onclick="changeCount('egg', 1)">+</button>
                 </div>
             </div>
-
             <div class="category-title">飲料類</div>
             <div class="menu-item">
                 <div class="item-info"><h4>豆漿</h4><p>$15</p></div>
@@ -262,3 +142,24 @@ window.onerror = function(message, source, lineno, colno, error) {
                     <button class="btn-calc" onclick="changeCount('soy', 1)">+</button>
                 </div>
             </div>
+            <div class="menu-item">
+                <div class="item-info"><h4>奶茶</h4><p>$20</p></div>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('milk', -1)">-</button>
+                    <span class="count-num" id="count-milk">0</span>
+                    <button class="btn-calc" onclick="changeCount('milk', 1)">+</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bar">
+            <div class="total-price"><span>總計金額：</span><span id="total-amount">$ 0</span></div>
+            <button class="btn-submit" onclick="submitOrder()">🚀 送出訂單 / 呼叫後台</button>
+        </div>
+    </div>
+    <div id="backend-view" class="view-box">
+        <div class="header"><h1>雲端接單後台</h1><p>即時同步客人的測試訂單</p></div>
+        <div class="nav-tabs">
+            <button class="btn-tab" onclick="switchView('customer')">📱 顧客點餐</button>
+            <button class="btn-tab" onclick="switchView('backend')">🏪 老闆後台</button>
+        </div>
+        <div class="backend-box">
