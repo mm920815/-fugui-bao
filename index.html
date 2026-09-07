@@ -1,3 +1,10 @@
+<script>
+window.onerror = function(message, source, lineno, colno, error) {
+    alert("捕獲到手機端錯誤: " + message + "\n在 " + source + ":" + lineno);
+    return true;
+};
+</script>
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -5,169 +12,269 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>富貴包專屬點餐系統</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px; }
-        .btn-container { max-width: 448px; margin: 0 auto 16px auto; display: flex; gap: 8px; background: white; padding: 8px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .btn-tab { flex: 1; padding: 10px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; font-size: 16px; }
-        #btn-cust { background-color: #d97706; color: white; }
-        #btn-admin { background-color: #e5e7eb; color: #374151; }
-        .view-box { max-width: 448px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background-color: #d97706; padding: 20px; color: white; text-align: center; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f7f7f7; 
+            color: #333; 
+            display: flex; 
+            justify-content: center; 
+        }
+        .main-container { 
+            display: flex; 
+            flex-direction: row; 
+            width: 100%; 
+            max-width: 1200px; 
+            padding: 20px; 
+            gap: 20px; 
+            box-sizing: border-box; 
+        }
+        .view-box { 
+            flex: 1; 
+            background: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            height: calc(100vh - 40px); 
+        }
+        .header { 
+            background-color: #d97706; 
+            color: white; 
+            padding: 20px; 
+            text-align: center; 
+        }
         .header h1 { margin: 0; font-size: 24px; }
-        .header p { margin: 4px 0 0 0; font-size: 12px; opacity: 0.9; }
-        .menu-list { padding: 16px; max-height: 50vh; overflow-y: auto; }
-        .category-title { font-weight: bold; color: #1f2937; border-left: 4px solid #d97706; padding-left: 8px; margin: 16px 0 8px 0; }
-        .item-card { display: flex; justify-content: space-between; align-items: center; background: #f9fafb; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #f3f4f6; }
-        .item-info h4 { margin: 0; color: #1f2937; font-size: 16px; }
-        .item-info p { margin: 2px 0 0 0; color: #d97706; font-weight: 500; font-size: 14px; }
-        .qty-btn-box { display: flex; align-items: center; gap: 12px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 4px 8px; }
-        .qty-btn { border: none; background: none; font-size: 18px; font-weight: bold; cursor: pointer; width: 24px; }
-        .qty-btn.plus { color: #d97706; }
-        .qty-btn.minus { color: #6b7280; }
-        .qty-num { font-weight: 600; width: 16px; text-align: center; }
-        .cart-box { padding: 16px; border-top: 1px solid #f3f4f6; background: #f9fafb; }
-        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 16px; }
-        .total-price { font-size: 24px; font-weight: 900; color: #d97706; }
-        .submit-btn { width: 100%; background: #d97706; color: white; border: none; font-weight: bold; padding: 14px; border-radius: 12px; font-size: 16px; cursor: pointer; }
-        .admin-box { max-width: 448px; margin: 0 auto; background: white; border-radius: 16px; padding: 16px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 16px; }
-        .admin-title h2 { margin: 0; font-size: 20px; color: #1f2937; }
-        .admin-title p { margin: 4px 0 0 0; font-size: 12px; color: #6b7280; }
-        .badge { background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: bold; }
-        .order-card { background: #f9fafb; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 12px; }
-        .order-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .order-id { font-family: monospace; color: #6b7280; }
-        .order-num { font-weight: 900; color: #d97706; font-size: 18px; }
-        .order-items { font-size: 14px; font-weight: bold; color: #1f2937; margin-bottom: 8px; }
-        .status-badge { background: #ffedd5; color: #c2410c; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-        .done-btn { background: #111827; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        .header p { margin: 4px 0 0; font-size: 14px; opacity: 0.9; }
+        .nav-tabs { 
+            display: flex; 
+            background: #f1f5f9; 
+            border-bottom: 1px solid #e2e8f0; 
+        }
+        .btn-tab { 
+            flex: 1; 
+            padding: 14px; 
+            text-align: center; 
+            background: none; 
+            border: none; 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #64748b; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+        }
+        .btn-tab.active { 
+            color: #d97706; 
+            border-bottom: 3px solid #d97706; 
+            background: #ffffff; 
+        }
+        .menu-list { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 16px; 
+        }
+        .category-title { 
+            font-size: 18px; 
+            color: #1e293b; 
+            border-left: 4px solid #d97706; 
+            padding-left: 8px; 
+            margin: 20px 0 12px; 
+        }
+        .menu-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px 0; 
+            border-bottom: 1px solid #f1f5f9; 
+        }
+        .item-info h4 { margin: 0; font-size: 16px; color: #1e293b; }
+        .item-info p { margin: 4px 0 0; font-size: 14px; color: #dc2626; font-weight: bold; }
+        .counter { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            background: #f1f5f9; 
+            padding: 4px 8px; 
+            border-radius: 20px; 
+        }
+        .btn-calc { 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            border: none; 
+            background: #ffffff; 
+            color: #1e293b; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .btn-calc:active { background: #e2e8f0; }
+        .count-num { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; }
+        .footer-bar { 
+            padding: 16px; 
+            background: #ffffff; 
+            border-top: 1px solid #e2e8f0; 
+        }
+        .total-price { 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-bottom: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+        }
+        .btn-submit { 
+            width: 100%; 
+            padding: 14px; 
+            background-color: #d97706; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(217, 119, 6, 0.2); 
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .btn-submit:active { background-color: #b45309; }
+        .backend-box { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+        }
+        .status-badge { 
+            align-self: center; 
+            background: #dcfce7; 
+            color: #15803d; 
+            padding: 6px 16px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            font-size: 14px; 
+        }
+        .order-list { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+        }
+        .order-card { 
+            background: #f8fafc; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 8px; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+        }
+        .order-time { font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
+        .order-item-detail { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+        
+        @media (max-width: 768px) { 
+            .main-container { padding: 0; gap: 0; height: 100vh; }
+            .view-box { border-radius: 0; height: 100vh; }
+            .view-box.hidden { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="btn-container">
-        <button onclick="switchView('customer')" id="btn-cust" class="btn-tab">📱 顧客點餐</button>
-        <button onclick="switchView('admin')" id="btn-admin" class="btn-tab">🏪 老闆後台</button>
-    </div>
-
+<div class="main-container">
+    <!-- 顧客點餐面板 -->
     <div id="customer-view" class="view-box">
         <div class="header">
             <h1>富貴包 點餐系統</h1>
             <p>手工現做・皮薄餡多・好喫又富貴</p>
         </div>
+        
+        <!-- 手機版切換頁籤 -->
+        <div class="nav-tabs">
+            <button class="btn-tab active" onclick="switchView('customer')">📱 顧客點餐</button>
+            <button class="btn-tab" onclick="switchView('backend')">🏪 老闆後台</button>
+        </div>
+
         <div class="menu-list">
             <div class="category-title">包子類</div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>豆沙包</h4><p>$18</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('豆沙包', 18, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-豆沙包" class="qty-num">0</span>
-                    <button onclick="updateQty('豆沙包', 18, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('bean', -1)">-</button>
+                    <span class="count-num" id="count-bean">0</span>
+                    <button class="btn-calc" onclick="changeCount('bean', 1)">+</button>
                 </div>
             </div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>肉包</h4><p>$20</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('肉包', 20, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-肉包" class="qty-num">0</span>
-                    <button onclick="updateQty('肉包', 20, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('meat', -1)">-</button>
+                    <span class="count-num" id="count-meat">0</span>
+                    <button class="btn-calc" onclick="changeCount('meat', 1)">+</button>
                 </div>
             </div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>竹筍包</h4><p>$20</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('竹筍包', 20, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-竹筍包" class="qty-num">0</span>
-                    <button onclick="updateQty('竹筍包', 20, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('bamboo', -1)">-</button>
+                    <span class="count-num" id="count-bamboo">0</span>
+                    <button class="btn-calc" onclick="changeCount('bamboo', 1)">+</button>
                 </div>
             </div>
+
             <div class="category-title">饅頭類</div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>黑糖饅頭</h4><p>$15</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('黑糖饅頭', 15, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-黑糖饅頭" class="qty-num">0</span>
-                    <button onclick="updateQty('黑糖饅頭', 15, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('brown', -1)">-</button>
+                    <span class="count-num" id="count-brown">0</span>
+                    <button class="btn-calc" onclick="changeCount('brown', 1)">+</button>
                 </div>
             </div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>饅頭夾蛋</h4><p>$25</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('饅頭夾蛋', 25, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-饅頭夾蛋" class="qty-num">0</span>
-                    <button onclick="updateQty('饅頭夾蛋', 25, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('egg', -1)">-</button>
+                    <span class="count-num" id="count-egg">0</span>
+                    <button class="btn-calc" onclick="changeCount('egg', 1)">+</button>
                 </div>
             </div>
+
             <div class="category-title">飲料類</div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>豆漿</h4><p>$15</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('豆漿', 15, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-豆漿" class="qty-num">0</span>
-                    <button onclick="updateQty('豆漿', 15, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('soy', -1)">-</button>
+                    <span class="count-num" id="count-soy">0</span>
+                    <button class="btn-calc" onclick="changeCount('soy', 1)">+</button>
                 </div>
             </div>
-            <div class="item-card">
+            <div class="menu-item">
                 <div class="item-info"><h4>奶茶</h4><p>$20</p></div>
-                <div class="qty-btn-box">
-                    <button onclick="updateQty('奶茶', 20, -1)" class="qty-btn minus">-</button>
-                    <span id="qty-奶茶" class="qty-num">0</span>
-                    <button onclick="updateQty('奶茶', 20, 1)" class="qty-btn plus">+</button>
+                <div class="counter">
+                    <button class="btn-calc" onclick="changeCount('milk', -1)">-</button>
+                    <span class="count-num" id="count-milk">0</span>
+                    <button class="btn-calc" onclick="changeCount('milk', 1)">+</button>
                 </div>
             </div>
         </div>
-        <div class="cart-box">
-            <div class="total-row"><span>總計金額：</span><span class="total-price">$<span id="total-amount">0</span></span></div>
-            <button onclick="submitOrder()" class="submit-btn">🚀 送出訂單 / 呼叫後台</button>
+
+        <div class="footer-bar">
+            <div class="total-price">
+                <span>總計金額：</span>
+                <span id="total-amount">$ 0</span>
+            </div>
+            <button class="btn-submit" onclick="submitOrder()">🚀 送出訂單 / 呼叫後台</button>
         </div>
     </div>
 
-    <div id="admin-view" class="admin-box">
-        <div class="admin-header">
-            <div class="admin-title"><h2>雲端接單後台</h2><p>即時同步客人的測試訂單</p></div>
-            <span class="badge">營業中</span>
+    <!-- 雲端接單後台 -->
+    <div id="backend-view" class="view-box hidden">
+        <div class="header">
+            <h1>雲端接單後台</h1>
+            <p>即時同步客人的測試訂單</p>
         </div>
-        <div id="order-list-container"></div>
-    </div>
-
-    <script>
-        let cart = {};
-        let orders = [{ id: "0001", number: "A12", items: "肉包 x2, 豆漿 x1", total: 55, status: "已接單" }];
-        let orderCounter = 2;
-
-        function updateQty(name, price, change) {
-            if (!cart[name]) cart[name] = { quantity: 0, price: price };
-            cart[name].quantity += change;
-            if (cart[name].quantity < 0) cart[name].quantity = 0;
-            document.getElementById('qty-' + name).innerText = cart[name].quantity;
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let total = 0;
-            for (let key in cart) total += cart[key].quantity * cart[key].price;
-            document.getElementById('total-amount').innerText = total;
-        }
-
-        function submitOrder() {
-            let itemStrings = [];
-            let total = 0;
-            for (let key in cart) {
-                if (cart[key].quantity > 0) {
-                    itemStrings.push(key + ' x' + cart[key].quantity);
-                    total += cart[key].quantity * cart[key].price;
-                }
-            }
-            if (itemStrings.length === 0) { alert("購物車內沒有商品！"); return; }
-
-            let newOrder = { id: '000' + orderCounter, number: 'A' + (11 + orderCounter), items: itemStrings.join(", "), total: total, status: "製作中" };
-            orders.unshift(newOrder);
-            orderCounter++;
-
-            for (let key in cart) {
-                cart[key].quantity = 0;
-                let el = document.getElementById('qty-' + key);
-                if(el) el.innerText = 0;
-            }
-            document.getElementById('total-amount').innerText = 0;
-            cart = {};
-            renderOrders();
+        
+        <div class="nav-tabs">
+            <button class="btn-tab" onclick="switchView('customer')">📱 顧客點餐</button>
