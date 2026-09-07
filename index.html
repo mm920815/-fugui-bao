@@ -1,5 +1,5 @@
 <script>
-// ✨ 偵錯監聽器與核心功能移至最頂端，徹底防止手機版底部截斷 Bug！ ✨
+// ✨ 核心偵錯與所有控制邏輯（加減、送單、計算）全部集中在最頂端，徹底封印手機吃字 Bug！ ✨
 window.onerror = function(message, source, lineno, colno, error) {
     alert("捕獲到手機端錯誤: " + message + "\n在 " + source + ":" + lineno);
     return true;
@@ -29,7 +29,47 @@ function calculateTotal() {
     for (var key in products) {
         total += products[key].count * products[key].price;
     }
-    document.getElementById('total-amount').innerText = '\$ ' + total;
+    document.getElementById('total-amount').innerText = '$ ' + total;
+}
+
+function submitOrder() {
+    var orderItems = [];
+    var total = 0;
+    for (var key in products) {
+        if (products[key].count > 0) {
+            orderItems.push({
+                name: products[key].name,
+                count: products[key].count,
+                subtotal: products[key].count * products[key].price
+            });
+            total += products[key].count * products[key].price;
+        }
+    }
+    if (orderItems.length === 0) {
+        alert("請至少選擇一樣美味的包子或飲料唷！");
+        return;
+    }
+    
+    var tips = document.getElementById('no-order-tips');
+    if (tips) tips.remove();
+    
+    var now = new Date();
+    var timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+    
+    var orderHtml = '<div class="order-card"><div class="order-time">⏱️ 接收時間：' + timeStr + '</div>';
+    orderItems.forEach(function(item) {
+        orderHtml += '<div class="order-item-detail"><span>' + item.name + ' x ' + item.count + '</span><span>$' + item.subtotal + '</span></div>';
+    });
+    orderHtml += '<hr style="border: none; border-top: 1px dashed #444; margin: 10px 0;"><div class="order-item-detail" style="font-weight: bold; color: #fbbf24;"><span>實收總計</span><span>$' + total + '</span></div></div>';
+    
+    document.getElementById('order-container').insertAdjacentHTML('afterbegin', orderHtml);
+    
+    for (var key in products) {
+        products[key].count = 0;
+        document.getElementById('count-' + key).innerText = 0;
+    }
+    calculateTotal();
+    alert("🎉 訂單已成功送到下方的老闆後台囉！請往下滑動網頁查看即時接單狀態！");
 }
 </script>
 
@@ -42,56 +82,164 @@ function calculateTotal() {
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; padding: 0; background-color: #fcf8f2;
+            margin: 0; padding: 0; 
+            /* ✨ 奢華純黑魂時尚背景 (幾何蒸籠線條) ✨ */
+            background-color: #0a0a0a;
             background-image: 
-                radial-gradient(rgba(217, 119, 6, 0.03) 15%, transparent 16%),
-                radial-gradient(rgba(217, 119, 6, 0.04) 15%, transparent 16%),
-                linear-gradient(45deg, rgba(217, 119, 6, 0.02) 25%, transparent 25%, transparent 75%, rgba(217, 119, 6, 0.02) 75%, rgba(217, 119, 6, 0.02)),
-                linear-gradient(45deg, rgba(217, 119, 6, 0.02) 25%, transparent 25%, transparent 75%, rgba(217, 119, 6, 0.02) 75%, rgba(217, 119, 6, 0.02));
-            background-size: 60px 60px; background-position: 0 0, 30px 30px, 0 0, 30px 30px;
-            color: #333; display: flex; justify-content: center; 
+                radial-gradient(rgba(251, 191, 36, 0.02) 15%, transparent 16%),
+                linear-gradient(45deg, rgba(255,255,255,0.01) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01));
+            background-size: 50px 50px; background-position: 0 0, 25px 25px;
+            color: #e5e5e5; display: flex; justify-content: center; 
         }
-        .main-container { display: flex; flex-direction: row; width: 100%; max-width: 1200px; padding: 20px; gap: 20px; box-sizing: border-box; }
-        .view-box { flex: 1; background: rgba(255, 255, 255, 0.96); border-radius: 16px; box-shadow: 0 10px 30px rgba(217,119,6,0.06); overflow: hidden; display: flex; flex-direction: column; height: calc(100vh - 40px); backdrop-filter: blur(5px); }
-        .header { background: linear-gradient(135deg, #eab308, #d97706); color: white; padding: 24px 20px; text-align: center; }
-        .header h1 { margin: 0; font-size: 26px; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header p { margin: 6px 0 0; font-size: 14px; opacity: 0.95; font-weight: 300; }
-        .nav-tabs { display: flex; background: #fdfaf6; border-bottom: 1px solid #f1e4d3; }
-        .btn-tab { flex: 1; padding: 14px; text-align: center; background: none; border: none; font-size: 16px; font-weight: bold; color: #8c7e6c; cursor: pointer; transition: all 0.2s; }
-        .btn-tab.active { color: #d97706; border-bottom: 3px solid #d97706; background: #ffffff; }
-        .menu-list { flex: 1; overflow-y: auto; padding: 16px; }
-        .category-title { font-size: 18px; color: #78350f; border-left: 4px solid #d97706; padding-left: 8px; margin: 20px 0 12px; font-weight: bold; }
-        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 8px; border-bottom: 1px solid #fcf6ed; }
-        .item-info h4 { margin: 0; font-size: 16px; color: #1e293b; }
-        .item-info p { margin: 4px 0 0; font-size: 14px; color: #dc2626; font-weight: bold; }
-        .counter { display: flex; align-items: center; gap: 12px; background: #fdf6ec; padding: 4px 8px; border-radius: 20px; }
-        .btn-calc { width: 28px; height: 28px; border-radius: 50%; border: none; background: #ffffff; color: #d97706; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(217,119,6,0.15); -webkit-tap-highlight-color: transparent; }
-        .count-num { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; color: #451a03; }
-        .footer-bar { padding: 16px; background: #ffffff; border-top: 1px solid #f1e4d3; }
-        .total-price { font-size: 18px; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; color: #451a03; }
-        .btn-submit { width: 100%; padding: 14px; background: linear-gradient(135deg, #eab308, #d97706); color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); -webkit-tap-highlight-color: transparent; letter-spacing: 1px; }
-        .backend-box { display: flex; flex-direction: column; height: 100%; }
-        .status-badge { align-self: center; background: #dcfce7; color: #15803d; padding: 6px 16px; border-radius: 20px; font-weight: bold; margin-top: 20px; font-size: 14px; }
-        .order-list { flex: 1; overflow-y: auto; padding: 20px; }
-        .order-card { background: #fdfbf7; border: 1px solid #f1e4d3; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .order-time { font-size: 12px; color: #94a3b8; margin-bottom: 8px; }
-        .order-item-detail { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
-        @media (max-width: 768px) { .main-container { padding: 0; gap: 0; height: 100vh; } .view-box { border-radius: 0; height: 100vh; } .view-box.hidden { display: none !important; } }
+        /* ✨ 改為單一垂直大容器，後台強制排在下方，徹底解決擁擠問題 ✨ */
+        .main-container { 
+            display: flex; 
+            flex-direction: column; 
+            width: 100%; 
+            max-width: 650px; 
+            padding: 16px; 
+            gap: 24px; 
+            box-sizing: border-box; 
+        }
+        .view-box { 
+            background: rgba(22, 22, 22, 0.95); 
+            border: 1px solid #262626;
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            backdrop-filter: blur(10px); 
+        }
+        .header { 
+            background: linear-gradient(135deg, #262626, #171717); 
+            border-bottom: 1px solid #333;
+            color: #fbbf24; /* 奢華金標題 */
+            padding: 26px 20px; 
+            text-align: center; 
+        }
+        .header h1 { margin: 0; font-size: 24px; letter-spacing: 2px; text-shadow: 0 2px 10px rgba(251,191,36,0.2); }
+        .header p { margin: 6px 0 0; font-size: 13px; color: #a3a3a3; font-weight: 300; }
+        
+        .menu-list { padding: 8px 16px 20px; }
+        .category-title { 
+            font-size: 16px; 
+            color: #fbbf24; 
+            border-left: 3px solid #fbbf24; 
+            padding-left: 10px; 
+            margin: 24px 0 14px; 
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .menu-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 16px 4px; 
+            border-bottom: 1px solid #1f1f1f; 
+        }
+        .item-info h4 { margin: 0; font-size: 16px; color: #f5f5f5; }
+        .item-info p { margin: 4px 0 0; font-size: 14px; color: #f87171; font-weight: bold; }
+        
+        /* 加減計數器深色優化 */
+        .counter { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            background: #171717; 
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            border: 1px solid #262626;
+        }
+        .btn-calc { 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            border: none; 
+            background: #262626; 
+            color: #fbbf24; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            -webkit-tap-highlight-color: transparent; 
+        }
+        .btn-calc:active { background: #333333; }
+        .count-num { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; color: #ffffff; }
+        
+        .footer-bar { 
+            padding: 20px 16px; 
+            background: #121212; 
+            border-top: 1px solid #262626; 
+        }
+        .total-price { 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-bottom: 16px; 
+            display: flex; 
+            justify-content: space-between; 
+            color: #ffffff;
+        }
+        
+        /* 奢華金膠囊送單鈕 */
+        .btn-submit { 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white; 
+            border: none; 
+            border-radius: 25px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.4); 
+            -webkit-tap-highlight-color: transparent; 
+            letter-spacing: 1px;
+            transition: transform 0.1s;
+        }
+        .btn-submit:active { transform: scale(0.98); }
+        
+        .backend-box { display: flex; flex-direction: column; padding-bottom: 20px; }
+        .status-badge { 
+            align-self: center; 
+            background: rgba(34, 197, 94, 0.15); 
+            color: #4ade80; 
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            padding: 6px 18px; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            margin-top: 24px; 
+            font-size: 13px; 
+            letter-spacing: 1px;
+        }
+        .order-list { padding: 16px; }
+        .order-card { 
+            background: #171717; 
+            border: 1px solid #262626; 
+            border-radius: 14px; 
+            padding: 16px; 
+            margin-bottom: 14px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .order-time { font-size: 12px; color: #737373; margin-bottom: 10px; }
+        .order-item-detail { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; color: #e5e5e5; }
     </style>
 </head>
 <body>
+
 <div class="main-container">
+    <!-- 顧客點餐面板 -->
     <div id="customer-view" class="view-box">
         <div class="header">
             <h1>富貴包 點餐系統</h1>
             <p>手工現做・皮薄餡多・好喫又富貴</p>
         </div>
-        <div class="nav-tabs">
-            <button class="btn-tab active" onclick="switchView('customer')">📱 顧客點餐</button>
-            <button class="btn-tab" onclick="switchView('backend')">🏪 老闆後台</button>
-        </div>
+
         <div class="menu-list">
-            <div class="category-title">包子類</div>
+            <div class="category-title">🥟 包子類</div>
             <div class="menu-item">
                 <div class="item-info"><h4>豆沙包</h4><p>$18</p></div>
                 <div class="counter">
@@ -116,50 +264,5 @@ function calculateTotal() {
                     <button class="btn-calc" onclick="changeCount('bamboo', 1)">+</button>
                 </div>
             </div>
-            <div class="category-title">饅頭類</div>
-            <div class="menu-item">
-                <div class="item-info"><h4>黑糖饅頭</h4><p>$15</p></div>
-                <div class="counter">
-                    <button class="btn-calc" onclick="changeCount('brown', -1)">-</button>
-                    <span class="count-num" id="count-brown">0</span>
-                    <button class="btn-calc" onclick="changeCount('brown', 1)">+</button>
-                </div>
-            </div>
-            <div class="menu-item">
-                <div class="item-info"><h4>饅頭夾蛋</h4><p>$25</p></div>
-                <div class="counter">
-                    <button class="btn-calc" onclick="changeCount('egg', -1)">-</button>
-                    <span class="count-num" id="count-egg">0</span>
-                    <button class="btn-calc" onclick="changeCount('egg', 1)">+</button>
-                </div>
-            </div>
-            <div class="category-title">飲料類</div>
-            <div class="menu-item">
-                <div class="item-info"><h4>豆漿</h4><p>$15</p></div>
-                <div class="counter">
-                    <button class="btn-calc" onclick="changeCount('soy', -1)">-</button>
-                    <span class="count-num" id="count-soy">0</span>
-                    <button class="btn-calc" onclick="changeCount('soy', 1)">+</button>
-                </div>
-            </div>
-            <div class="menu-item">
-                <div class="item-info"><h4>奶茶</h4><p>$20</p></div>
-                <div class="counter">
-                    <button class="btn-calc" onclick="changeCount('milk', -1)">-</button>
-                    <span class="count-num" id="count-milk">0</span>
-                    <button class="btn-calc" onclick="changeCount('milk', 1)">+</button>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bar">
-            <div class="total-price"><span>總計金額：</span><span id="total-amount">$ 0</span></div>
-            <button class="btn-submit" onclick="submitOrder()">🚀 送出訂單 / 呼叫後台</button>
-        </div>
-    </div>
-    <div id="backend-view" class="view-box">
-        <div class="header"><h1>雲端接單後台</h1><p>即時同步客人的測試訂單</p></div>
-        <div class="nav-tabs">
-            <button class="btn-tab" onclick="switchView('customer')">📱 顧客點餐</button>
-            <button class="btn-tab" onclick="switchView('backend')">🏪 老闆後台</button>
-        </div>
-        <div class="backend-box">
+
+            <div class="category-title">🥖 饅頭類</div>
